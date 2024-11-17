@@ -1,15 +1,66 @@
 import { useCallback } from 'react'
+import { fabric } from 'fabric'
+import { useAutoResize } from './use-auto-resize'
+import { useState } from 'react'
 
 export const useEditor = () => {
+  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null)
+  const [container, setContainer] = useState<HTMLDivElement | null>(null)
+
+  useAutoResize({
+    canvas,
+    container,
+  })
+
   const init = useCallback(
     ({
       initialCanvas,
       initialContainer,
     }: {
-      initialCanvas: any
+      initialCanvas: fabric.Canvas
       initialContainer: HTMLDivElement
     }) => {
-      console.log('Initializing Editor')
+      fabric.Object.prototype.set({
+        cornerColor: '#fff',
+        cornerStyle: 'circle',
+        borderColor: '#3b82f6',
+        borderScaleFactor: 1.5,
+        transparentCorners: false,
+        borderOpacityWhenMoving: 1,
+        cornerStrokeColor: '#3b82f6',
+      })
+
+      const initalWorkspace = new fabric.Rect({
+        width: 900,
+        height: 1200,
+        name: 'clip',
+        fill: 'white',
+        selectable: false,
+        hasControls: false,
+        shadow: new fabric.Shadow({
+          color: 'rgba(0,0,0, 0.8',
+          blur: 5,
+        }),
+      })
+
+      initialCanvas.setWidth(initialContainer.offsetWidth)
+      initialCanvas.setHeight(initialContainer.offsetHeight)
+
+      initialCanvas.add(initalWorkspace)
+      initialCanvas.centerObject(initalWorkspace)
+      initialCanvas.clipPath = initalWorkspace
+
+      setCanvas(initialCanvas)
+      setContainer(initialContainer)
+
+      const test = new fabric.Rect({
+        height: 100,
+        width: 100,
+        fill: 'black',
+      })
+
+      initialCanvas.add(test)
+      initialCanvas.centerObject(test)
     },
     []
   )
